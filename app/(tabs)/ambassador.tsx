@@ -8,6 +8,7 @@ import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-na
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../lib/theme';
+import { useRouter } from 'expo-router';
 
 const SECTIONS = [
   {
@@ -26,8 +27,8 @@ const SECTIONS = [
   {
     icon: 'card',
     title: 'Membership',
-    sub: 'Join the movement. Monthly tiers with standing perks across the store.',
-    url: 'https://www.shoponlythefinest.com/membership',
+    sub: 'The Inner Circle — five tiers from Free to the Elite Vault.',
+    route: '/membership',
   },
   {
     icon: 'trending-up',
@@ -39,6 +40,7 @@ const SECTIONS = [
 
 export default function AmbassadorScreen() {
   const theme = useTheme();
+  const router = useRouter();
   const s = styles(theme);
 
   return (
@@ -51,7 +53,7 @@ export default function AmbassadorScreen() {
           <Pressable
             key={section.title}
             style={[s.card, section.featured && s.cardFeatured]}
-            onPress={() => Linking.openURL(section.url)}
+            onPress={() => (section.route ? router.push(section.route as never) : Linking.openURL(section.url!))}
           >
             <View style={[s.iconWrap, section.featured && s.iconWrapFeatured]}>
               <Ionicons name={section.icon as never} size={section.featured ? 24 : 20} color={theme.secondary} />
