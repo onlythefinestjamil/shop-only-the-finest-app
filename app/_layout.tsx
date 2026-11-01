@@ -22,7 +22,7 @@ export default function RootLayout() {
                 headerShown: false,
                 animation: 'fade',
                 presentation: 'card',
-                contentStyle: { backgroundColor: '#06040D' },
+                contentStyle: { backgroundColor: '#0a0a0a' },
               }}
             />
           </CatalogProvider>

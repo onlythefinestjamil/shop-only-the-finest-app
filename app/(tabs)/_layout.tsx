@@ -1,5 +1,5 @@
 /**
- * Tab layout — Shop / Cart / Profile with the custom JARVIS TabBar.
+ * Tab layout — Shop / Cart / Profile with clean minimal TabBar.
  */
 
 import { Tabs } from 'expo-router';

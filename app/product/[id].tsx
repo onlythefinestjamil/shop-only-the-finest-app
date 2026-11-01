@@ -13,10 +13,7 @@ import { useTheme } from '../../lib/theme';
 import { useCatalog } from '../../lib/catalogContext';
 import { useCart } from '../../lib/cartContext';
 import { formatPrice, createCheckoutUrl } from '../../lib/shopify';
-import { GridOverlay } from '../../components/GridOverlay';
-import { CornerBrackets } from '../../components/CornerBrackets';
-import { GlassCard } from '../../components/GlassCard';
-import { GlowButton } from '../../components/GlowButton';
+import { Button } from '../../components/Button';
 
 export default function ProductDetailScreen() {
   const theme = useTheme();
@@ -56,10 +53,9 @@ export default function ProductDetailScreen() {
   if (!product) {
     return (
       <View style={s.notFound}>
-        <GridOverlay opacity={0.4} />
         <Ionicons name="alert-circle-outline" size={48} color={theme.textMuted} />
         <Text style={s.notFoundText}>Product not found</Text>
-        <GlowButton label="Back to Shop" icon="arrow-back" variant="secondary" onPress={() => router.back()} style={{ marginTop: 16, width: 200 }} />
+        <Button label="Back to Shop" icon="arrow-back" variant="secondary" onPress={() => router.back()} style={{ marginTop: 16, width: 200 }} />
       </View>
     );
   }
@@ -91,7 +87,6 @@ export default function ProductDetailScreen() {
 
   return (
     <View style={s.screen}>
-      <GridOverlay opacity={0.4} />
       {/* Top bar */}
       <View style={[s.topBar, { paddingTop: insets.top + 8 }]}>
         <Pressable style={s.backBtn} onPress={() => router.back()} hitSlop={10}>
@@ -109,9 +104,8 @@ export default function ProductDetailScreen() {
           {product.image ? (
             <Image source={{ uri: product.image }} style={s.heroImage} resizeMode="cover" />
           ) : (
-            <LinearGradient colors={[theme.primary, theme.primaryMuted]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.heroImage} />
+            <LinearGradient colors={['#1a1a1a', '#0f0f0f']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.heroImage} />
           )}
-          <LinearGradient colors={['rgba(6,4,13,0.45)', 'transparent', 'rgba(6,4,13,0.85)']} style={s.heroScrim} />
           <View style={s.heroBadges}>
             {onSale && (
               <View style={s.salePill}>
@@ -122,7 +116,6 @@ export default function ProductDetailScreen() {
               <Text style={s.brandPillText}>{product.vendor}</Text>
             </View>
           </View>
-          <CornerBrackets color={theme.bracketColor} size={18} inset={10} opacity={0.5} />
         </View>
 
         <View style={s.content}>
@@ -144,7 +137,6 @@ export default function ProductDetailScreen() {
               <View style={s.optionValues}>
                 {option.values.map((value) => {
                   const active = selectedOptions[option.name] === value;
-                  // Check if any variant with this option value is available.
                   const valueAvailable = product.variants.some(
                     (v) => v.selectedOptions.some((o) => o.name === option.name && o.value === value) && v.available,
                   );
@@ -189,7 +181,7 @@ export default function ProductDetailScreen() {
 
           {/* Actions */}
           <View style={s.actions}>
-            <GlowButton
+            <Button
               label={available ? 'Add to Cart' : 'Sold Out'}
               icon={available ? 'cart' : 'ban-outline'}
               variant={available ? 'primary' : 'ghost'}
@@ -197,10 +189,10 @@ export default function ProductDetailScreen() {
               disabled={!available}
               style={{ flex: 1 }}
             />
-            <GlowButton
+            <Button
               label="Buy Now"
               icon="flash"
-              variant="success"
+              variant="secondary"
               onPress={handleBuyNow}
               loading={busy}
               disabled={!available}
@@ -224,45 +216,43 @@ const styles = (t: ReturnType<typeof useTheme>) =>
     notFound: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: t.abyss },
     notFoundText: { color: t.textMuted, fontSize: 16, fontWeight: '600' },
     topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingBottom: 8, zIndex: 10 },
-    backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.surfaceGlass, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.borderSubtle },
-    topBarTitle: { color: t.textMuted, fontSize: 12, fontWeight: '800', letterSpacing: 2, textTransform: 'uppercase' },
+    backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.border },
+    topBarTitle: { color: t.textMuted, fontSize: 12, fontWeight: '700', letterSpacing: 2, textTransform: 'uppercase' },
     heroWrap: { width: '100%', height: 420, backgroundColor: t.surfaceMuted, overflow: 'hidden', position: 'relative' },
     heroImage: { width: '100%', height: '100%' },
-    heroScrim: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
     heroBadges: { position: 'absolute', top: 16, left: 16, right: 16, flexDirection: 'row', justifyContent: 'space-between' },
-    salePill: { backgroundColor: t.error, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, shadowColor: t.error, shadowOpacity: 0.5, shadowRadius: 8, elevation: 4 },
-    salePillText: { color: '#FFFFFF', fontSize: 11, fontWeight: '900', letterSpacing: 0.5 },
-    brandPill: { backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
-    brandPillText: { color: t.secondary, fontSize: 10, fontWeight: '800', letterSpacing: 0.5 },
+    salePill: { backgroundColor: t.error, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
+    salePillText: { color: '#ffffff', fontSize: 11, fontWeight: '800', letterSpacing: 0.5 },
+    brandPill: { backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
+    brandPillText: { color: t.text, fontSize: 10, fontWeight: '800', letterSpacing: 0.5 },
     content: { padding: 20, paddingTop: 22 },
-    eyebrow: { color: t.secondary, letterSpacing: 2.5, fontWeight: '800', fontSize: 11 },
-    title: { color: t.text, fontSize: 26, fontWeight: '900', letterSpacing: -0.5, marginTop: 6, textShadowColor: `${t.primary}44`, textShadowRadius: 10 },
+    eyebrow: { color: t.textMuted, letterSpacing: 2, fontWeight: '700', fontSize: 11 },
+    title: { color: t.text, fontSize: 26, fontWeight: '900', letterSpacing: -0.5, marginTop: 6 },
     priceRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8 },
-    price: { color: t.primary, fontSize: 28, fontWeight: '900' },
-    compareAt: { color: t.textMuted, fontSize: 16, fontWeight: '600', textDecorationLine: 'line-through' },
-    stockPill: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginLeft: 4 },
-    stockPillText: { fontSize: 9, fontWeight: '900', letterSpacing: 0.8 },
+    price: { color: t.text, fontSize: 28, fontWeight: '800' },
+    compareAt: { color: t.textMuted, fontSize: 16, fontWeight: '500', textDecorationLine: 'line-through' },
+    stockPill: { borderWidth: 1, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, marginLeft: 4 },
+    stockPillText: { fontSize: 9, fontWeight: '800', letterSpacing: 0.8 },
     optionGroup: { marginTop: 22 },
-    optionLabel: { color: t.textMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.6, marginBottom: 10 },
+    optionLabel: { color: t.textMuted, fontSize: 11, fontWeight: '700', letterSpacing: 1.5, marginBottom: 10 },
     optionValues: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     optionChip: {
-      backgroundColor: t.surfaceGlass, borderColor: t.border, borderWidth: 1, borderRadius: t.buttonRadius,
+      backgroundColor: t.surface, borderColor: t.border, borderWidth: 1, borderRadius: t.buttonRadius,
       paddingVertical: 11, paddingHorizontal: 18, minWidth: 54, alignItems: 'center',
     },
     optionChipActive: {
-      backgroundColor: `${t.primary}22`, borderColor: t.primary, borderWidth: 1.5,
-      shadowColor: t.primary, shadowOpacity: 0.35, shadowRadius: 10, shadowOffset: { width: 0, height: 2 }, elevation: 4,
+      backgroundColor: t.text, borderColor: t.text, borderWidth: 1.5,
     },
     optionChipDisabled: { opacity: 0.5 },
-    optionChipText: { color: t.textMuted, fontSize: 14, fontWeight: '800' },
-    optionChipTextActive: { color: t.primary, fontSize: 14, fontWeight: '900' },
+    optionChipText: { color: t.textMuted, fontSize: 14, fontWeight: '700' },
+    optionChipTextActive: { color: '#000000', fontSize: 14, fontWeight: '800' },
     descWrap: { marginTop: 22 },
-    descLabel: { color: t.textMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.6, marginBottom: 8 },
+    descLabel: { color: t.textMuted, fontSize: 11, fontWeight: '700', letterSpacing: 1.5, marginBottom: 8 },
     desc: { color: t.text, fontSize: 14, lineHeight: 22, fontWeight: '500' },
     tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 16 },
     tagPill: { backgroundColor: t.surfaceAccent, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: t.borderSubtle },
-    tagText: { color: t.textSecondary, fontSize: 10, fontWeight: '700' },
+    tagText: { color: t.textSecondary, fontSize: 10, fontWeight: '600' },
     actions: { marginTop: 24 },
     viewOnSite: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 18, padding: 10 },
-    viewOnSiteText: { color: t.secondary, fontSize: 13, fontWeight: '700' },
+    viewOnSiteText: { color: t.secondary, fontSize: 13, fontWeight: '600' },
   });

@@ -1,19 +1,16 @@
 /**
- * Shop — product catalog with hero, search, collection filters, and the
- * holographic product grid. Pulls from the Base44/Shopify catalog with seed
- * fallback.
+ * Shop — product catalog with hero, search, collection filters, and product grid.
+ * Pulls from the Base44/Shopify catalog with seed fallback.
  */
 
 import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme, gradients } from '../../lib/theme';
+import { useTheme } from '../../lib/theme';
 import { useCatalog } from '../../lib/catalogContext';
 import { useCart } from '../../lib/cartContext';
-import { GridOverlay } from '../../components/GridOverlay';
 import { SectionHeader } from '../../components/SectionHeader';
 import { ProductCard } from '../../components/ProductCard';
 
@@ -44,7 +41,6 @@ export default function ShopScreen() {
 
   return (
     <View style={s.screen}>
-      <GridOverlay opacity={0.5} />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
         {/* Brand header */}
         <View style={s.header}>
@@ -85,17 +81,17 @@ export default function ShopScreen() {
           ))}
         </ScrollView>
 
-        {/* Connection telemetry */}
-        <View style={s.telemetryRow}>
-          <View style={[s.telemetryDot, { backgroundColor: live ? theme.success : theme.warning }]} />
-          <Text style={s.telemetryText}>{live ? 'LIVE · Shopify Storefront' : 'OFFLINE · Seeded catalog'}</Text>
-          <Text style={s.telemetryCount}>· {filtered.length} ITEMS</Text>
+        {/* Status row */}
+        <View style={s.statusRow}>
+          <View style={[s.statusDot, { backgroundColor: live ? theme.success : theme.textTertiary }]} />
+          <Text style={s.statusText}>{live ? 'LIVE · Shopify Storefront' : 'Seeded catalog'}</Text>
+          <Text style={s.statusCount}>· {filtered.length} items</Text>
         </View>
 
         {/* Product grid */}
         {loading && products.length === 0 ? (
           <View style={s.loadingWrap}>
-            <ActivityIndicator size="large" color={theme.primary} />
+            <ActivityIndicator size="large" color={theme.text} />
             <Text style={s.loadingText}>Loading the finest…</Text>
           </View>
         ) : filtered.length === 0 ? (
@@ -127,7 +123,7 @@ export default function ShopScreen() {
       {/* Floating cart FAB */}
       {count > 0 && (
         <Pressable style={({ pressed }) => [s.fab, pressed && s.fabPressed]} onPress={() => router.push('/cart')}>
-          <Ionicons name="bag" size={22} color="#FFFFFF" />
+          <Ionicons name="bag" size={22} color="#000000" />
           <View style={s.fabBadge}>
             <Text style={s.fabBadgeText}>{count > 99 ? '99+' : count}</Text>
           </View>
@@ -141,32 +137,31 @@ const styles = (t: ReturnType<typeof useTheme>) =>
   StyleSheet.create({
     screen: { flex: 1, backgroundColor: t.abyss },
     header: { paddingHorizontal: 20, marginBottom: 16 },
-    eyebrow: { color: t.secondary, letterSpacing: 3, fontWeight: '800', fontSize: 11 },
-    brandTitle: { color: t.text, fontSize: 34, fontWeight: '900', letterSpacing: -1, marginTop: 6, textShadowColor: `${t.primary}55`, textShadowRadius: 14 },
-    subtitle: { color: t.textMuted, fontSize: 14, fontWeight: '500', lineHeight: 20, marginTop: 6 },
+    eyebrow: { color: t.textMuted, letterSpacing: 3, fontWeight: '700', fontSize: 11 },
+    brandTitle: { color: t.text, fontSize: 34, fontWeight: '900', letterSpacing: -1, marginTop: 6 },
+    subtitle: { color: t.textMuted, fontSize: 14, fontWeight: '500', lineHeight: 20, marginTop: 8 },
     searchWrap: {
       flexDirection: 'row', alignItems: 'center', gap: 10,
       marginHorizontal: 20, marginBottom: 14,
-      backgroundColor: t.surfaceGlass, borderColor: t.border, borderWidth: 1,
+      backgroundColor: t.surface, borderColor: t.border, borderWidth: 1,
       borderRadius: t.buttonRadius, paddingHorizontal: 14, paddingVertical: 12,
     },
     searchIcon: { marginRight: 2 },
     searchInput: { flex: 1, color: t.text, fontSize: 15, fontWeight: '600', padding: 0 },
     chipRow: { paddingHorizontal: 20, paddingBottom: 14, gap: 8 },
     chip: {
-      backgroundColor: t.surfaceGlass, borderColor: t.border, borderWidth: 1,
+      backgroundColor: t.surface, borderColor: t.border, borderWidth: 1,
       borderRadius: t.buttonRadius, paddingVertical: 8, paddingHorizontal: 16,
     },
     chipActive: {
-      backgroundColor: t.primary, borderColor: t.primary,
-      shadowColor: t.primary, shadowOpacity: 0.4, shadowRadius: 10, shadowOffset: { width: 0, height: 2 }, elevation: 4,
+      backgroundColor: t.text, borderColor: t.text,
     },
-    chipText: { color: t.textMuted, fontSize: 13, fontWeight: '800' },
-    chipTextActive: { color: '#FFFFFF', fontSize: 13, fontWeight: '800' },
-    telemetryRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 20, marginBottom: 12 },
-    telemetryDot: { width: 7, height: 7, borderRadius: 3.5 },
-    telemetryText: { color: t.textTertiary, fontSize: 10, fontWeight: '700', letterSpacing: 1.2 },
-    telemetryCount: { color: t.textTertiary, fontSize: 10, fontWeight: '700', letterSpacing: 1.2 },
+    chipText: { color: t.textMuted, fontSize: 13, fontWeight: '700' },
+    chipTextActive: { color: '#000000', fontSize: 13, fontWeight: '800' },
+    statusRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 20, marginBottom: 12 },
+    statusDot: { width: 7, height: 7, borderRadius: 3.5 },
+    statusText: { color: t.textTertiary, fontSize: 11, fontWeight: '600', letterSpacing: 0.5 },
+    statusCount: { color: t.textTertiary, fontSize: 11, fontWeight: '600', letterSpacing: 0.5 },
     grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, gap: 12 },
     gridCell: { width: '47%', flexGrow: 1 },
     loadingWrap: { alignItems: 'center', justifyContent: 'center', paddingVertical: 60, gap: 12 },
@@ -176,14 +171,14 @@ const styles = (t: ReturnType<typeof useTheme>) =>
     emptySub: { color: t.textMuted, fontSize: 13 },
     footer: { color: t.textTertiary, fontSize: 11, textAlign: 'center', marginTop: 24, letterSpacing: 1 },
     fab: {
-      position: 'absolute', bottom: 88, right: 20, width: 58, height: 58, borderRadius: 29,
-      backgroundColor: t.primary, alignItems: 'center', justifyContent: 'center',
-      shadowColor: t.primary, shadowOpacity: 0.5, shadowRadius: 18, shadowOffset: { width: 0, height: 4 }, elevation: 10,
+      position: 'absolute', bottom: 88, right: 20, width: 56, height: 56, borderRadius: 28,
+      backgroundColor: t.text, alignItems: 'center', justifyContent: 'center',
+      shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 8,
     },
     fabPressed: { transform: [{ scale: 0.92 }], opacity: 0.85 },
     fabBadge: {
-      position: 'absolute', top: -4, right: -4, backgroundColor: t.secondary, borderRadius: 12, minWidth: 22, height: 22,
+      position: 'absolute', top: -4, right: -4, backgroundColor: t.error, borderRadius: 12, minWidth: 22, height: 22,
       alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: t.abyss, paddingHorizontal: 5,
     },
-    fabBadgeText: { color: '#04121F', fontSize: 11, fontWeight: '900' },
+    fabBadgeText: { color: '#ffffff', fontSize: 11, fontWeight: '900' },
   });

@@ -6,12 +6,13 @@ Shopify Storefront API integration through Base44 server functions.
 
 ## Design language
 
-Dark **JARVIS-protocol** aesthetic matching the Athos Peaks design system:
+Clean **premium streetwear** aesthetic matching shoponlythefinest.com:
 
-- **Purple** `#9146FF` · **Cyan** `#38B6FF` · **Emerald** `#28E5A0`
-- Glassmorphic surfaces, glowing borders, corner-bracket HUD framing
-- Holographic product cards, ambient gradients, pulsing accent dots
-- Bottom tab navigation (Shop · Cart · Profile) with animated glow
+- **Black** `#0a0a0a` backgrounds · **white** `#ffffff` text · subtle warm-gold `#c9a96e` accents
+- Clean product cards — image, OTF brand tag, product name, price, Quick View
+- Minimal UI — no holographic effects, no glow, no corner brackets
+- Bottom tab navigation (Shop · Cart · Profile) — clean, minimal
+- Premium e-commerce feel like Kith, Stussy, Aime Leon Dore
 
 ## Architecture
 
@@ -20,14 +21,14 @@ app/
 ├── _layout.tsx              # Root: ThemeProvider → AuthProvider → CartProvider → CatalogProvider → Stack
 ├── index.tsx                # Redirect → /shop
 ├── (tabs)/
-│   ├── _layout.tsx          # Tab layout with custom JARVIS TabBar
+│   ├── _layout.tsx          # Tab layout with clean minimal TabBar
 │   ├── shop.tsx             # Product catalog + search + collection filters
 │   ├── cart.tsx             # Cart with quantity controls + checkout
 │   └── profile.tsx          # Sign in / register / OTP + order history
 └── product/[id].tsx         # Product detail with variant selectors
-components/                  # GlassCard, CornerBrackets, TabBar, ProductCard, GlowButton, GridOverlay, SectionHeader
+components/                  # Button, TabBar, ProductCard, SectionHeader
 lib/
-├── theme.tsx                # JARVIS theme tokens, gradients, glow, typography
+├── theme.tsx                # Premium streetwear theme tokens + typography
 ├── base44.ts                # Base44 SDK client (production app)
 ├── config.ts                # Production app ID + storefront URLs
 ├── shopify.ts               # Shopify via Base44 server functions (+ seed catalog)
