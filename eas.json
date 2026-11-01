@@ -34,6 +34,12 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "jukethemovement@icloud.com",
+        "appleTeamId": "W2SX6LJGC5",
+        "ascAppId": "6829373419"
+      }
+    }
   }
 }
