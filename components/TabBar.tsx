@@ -1,6 +1,6 @@
 /**
  * TabBar — clean minimal bottom navigation.
- * Tabs: Shop, Cart, Profile.
+ * Tabs: Shop, Lookbook, Cart, Ambassador, Profile.
  */
 
 import { useRouter, usePathname } from 'expo-router';
@@ -9,18 +9,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../lib/theme';
 import { useCart } from '../lib/cartContext';
 
-type TabKey = 'grid' | 'cart' | 'person';
-
 interface TabDef {
   href: string;
-  iconFilled: TabKey;
+  iconFilled: string;
   iconOutline: string;
   label: string;
 }
 
 const tabs: TabDef[] = [
   { href: '/shop', iconFilled: 'grid', iconOutline: 'grid-outline', label: 'Shop' },
+  { href: '/lookbook', iconFilled: 'book', iconOutline: 'book-outline', label: 'Lookbook' },
   { href: '/cart', iconFilled: 'cart', iconOutline: 'cart-outline', label: 'Cart' },
+  { href: '/ambassador', iconFilled: 'ribbon', iconOutline: 'ribbon-outline', label: 'Ambassador' },
   { href: '/profile', iconFilled: 'person', iconOutline: 'person-outline', label: 'Profile' },
 ];
 
@@ -54,7 +54,9 @@ export function TabBar() {
                 </View>
               )}
             </View>
-            <Text style={[s.label, active && s.labelActive]}>{tab.label}</Text>
+            <Text style={[s.label, active && s.labelActive]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+              {tab.label}
+            </Text>
             {active && <View style={s.activeIndicator} />}
           </Pressable>
         );

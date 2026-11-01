@@ -1,5 +1,5 @@
 /**
- * Tab layout — Shop / Cart / Profile with clean minimal TabBar.
+ * Tab layout — Shop / Lookbook / Cart / Ambassador / Profile.
  */
 
 import { Tabs } from 'expo-router';
@@ -15,7 +15,9 @@ export default function TabLayout() {
       tabBar={() => <TabBar />}
     >
       <Tabs.Screen name="shop" options={{ title: 'Shop' }} />
+      <Tabs.Screen name="lookbook" options={{ title: 'Lookbook' }} />
       <Tabs.Screen name="cart" options={{ title: 'Cart' }} />
+      <Tabs.Screen name="ambassador" options={{ title: 'Ambassador' }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
     </Tabs>
   );
