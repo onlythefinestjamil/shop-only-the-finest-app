@@ -22,6 +22,15 @@
       "env": {
         "EAS_BUILD_PROFILE": "production"
       }
+    },
+    "standalone": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_BASE44_APP_ID": "69ddebfc0f7c323042ac3a0c"
+      }
     }
   },
   "submit": {
