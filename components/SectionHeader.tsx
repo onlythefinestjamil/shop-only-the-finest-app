@@ -53,12 +53,14 @@ const styles = (t: ReturnType<typeof useTheme>) =>
       color: t.textMuted,
       marginBottom: 4,
       textTransform: 'uppercase',
+      fontFamily: t.fontBodyBold,
     },
     title: {
       color: t.text,
-      fontSize: 20,
-      fontWeight: '800',
-      letterSpacing: -0.3,
+      fontSize: 22,
+      fontWeight: '500',
+      letterSpacing: 0.3,
+      fontFamily: t.fontHeadingMedium,
     },
   });
 

@@ -7,6 +7,13 @@
  */
 
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { CormorantGaramond_300Light, CormorantGaramond_500Medium } from '@expo-google-fonts/cormorant-garamond';
+import {
+  SpaceGrotesk_400Regular,
+  SpaceGrotesk_500Medium,
+  SpaceGrotesk_600SemiBold,
+  SpaceGrotesk_700Bold,
+} from '@expo-google-fonts/space-grotesk';
 
 // ---------------------------------------------------------------------------
 // Core tokens
@@ -47,6 +54,15 @@ export interface ThemeTokens {
   hudColor: string;
   gridColor: string;
   bracketColor: string;
+  // typography — exact site fonts
+  /** Headings — Cormorant Garamond (site serif) */
+  fontHeading: string;
+  fontHeadingMedium: string;
+  /** Body — Space Grotesk (site sans) */
+  fontBody: string;
+  fontBodyMedium: string;
+  fontBodySemiBold: string;
+  fontBodyBold: string;
 }
 
 export const theme: ThemeTokens = {
@@ -61,15 +77,15 @@ export const theme: ThemeTokens = {
   border: '#222222',
   borderSubtle: '#181818',
   borderGlow: '#222222',
-  text: '#ffffff',
+  text: '#f5f5f5',
   textMuted: '#888888',
   textSecondary: '#cccccc',
   textTertiary: '#555555',
-  textGlow: '#ffffff',
+  textGlow: '#f5f5f5',
   primary: '#ffffff',
   primaryMuted: '#333333',
-  secondary: '#c9a96e',
-  accent: '#c9a96e',
+  secondary: '#F3D068',
+  accent: '#F3D068',
   success: '#4ade80',
   warning: '#fbbf24',
   error: '#ef4444',
@@ -79,6 +95,23 @@ export const theme: ThemeTokens = {
   hudColor: '#888888',
   gridColor: '#111111',
   bracketColor: '#222222',
+  // typography — exact site fonts (loaded in root layout)
+  fontHeading: 'CormorantGaramond_300Light',
+  fontHeadingMedium: 'CormorantGaramond_500Medium',
+  fontBody: 'SpaceGrotesk_400Regular',
+  fontBodyMedium: 'SpaceGrotesk_500Medium',
+  fontBodySemiBold: 'SpaceGrotesk_600SemiBold',
+  fontBodyBold: 'SpaceGrotesk_700Bold',
+};
+
+/** Font map for useFonts() in the root layout */
+export const appFonts = {
+  CormorantGaramond_300Light,
+  CormorantGaramond_500Medium,
+  SpaceGrotesk_400Regular,
+  SpaceGrotesk_500Medium,
+  SpaceGrotesk_600SemiBold,
+  SpaceGrotesk_700Bold,
 };
 
 // ---------------------------------------------------------------------------

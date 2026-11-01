@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -88,6 +88,18 @@ export default function ShopScreen() {
           <Text style={s.statusCount}>· {filtered.length} items</Text>
         </View>
 
+        {/* Design Studio — make your own designs (site feature) */}
+        <Pressable style={s.studioCard} onPress={() => { Linking.openURL('https://www.shoponlythefinest.com/design-studio'); }}>
+          <View style={s.studioIconWrap}>
+            <Ionicons name="color-palette" size={22} color={theme.secondary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={s.studioTitle}>Make Your Own Designs</Text>
+            <Text style={s.studioSub}>Design Studio — AI Design Tool, Custom Merch Builder, community gallery. Create, upload, get it produced.</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={theme.textMuted} />
+        </Pressable>
+
         {/* Product grid */}
         {loading && products.length === 0 ? (
           <View style={s.loadingWrap}>
@@ -117,6 +129,32 @@ export default function ShopScreen() {
           </View>
         )}
 
+        {/* Discover — every other section of shoponlythefinest.com */}
+        <SectionHeader title="Discover" eyebrow="The World of OTF" style={{ marginTop: 28, paddingHorizontal: 20 }} />
+        <View style={s.discoverGrid}>
+          {[
+            { label: 'Lookbook', icon: 'book', url: 'https://www.shoponlythefinest.com/lookbook' },
+            { label: 'Inner Circle', icon: 'diamond', url: 'https://www.shoponlythefinest.com/inner-circle' },
+            { label: 'Membership', icon: 'card', url: 'https://www.shoponlythefinest.com/membership' },
+            { label: 'Ambassador', icon: 'ribbon', url: 'https://www.shoponlythefinest.com/ambassador' },
+            { label: 'Favorites', icon: 'heart', url: 'https://www.shoponlythefinest.com/favorites' },
+            { label: 'Track Order', icon: 'locate', url: 'https://www.shoponlythefinest.com/track' },
+            { label: 'Affiliate', icon: 'trending-up', url: 'https://www.shoponlythefinest.com/affiliate-dashboard' },
+            { label: 'About', icon: 'information-circle', url: 'https://www.shoponlythefinest.com/about' },
+            { label: 'Contact', icon: 'mail', url: 'https://www.shoponlythefinest.com/contact' },
+            { label: 'FAQ', icon: 'help-circle', url: 'https://www.shoponlythefinest.com/faq' },
+          ].map((item) => (
+            <Pressable
+              key={item.label}
+              style={s.discoverCard}
+              onPress={() => Linking.openURL(item.url)}
+            >
+              <Ionicons name={item.icon as any} size={19} color={theme.secondary} />
+              <Text style={s.discoverLabel}>{item.label}</Text>
+            </Pressable>
+          ))}
+        </View>
+
         <Text style={s.footer}>Only The Finest · Crafted For The Chosen</Text>
       </ScrollView>
 
@@ -137,9 +175,9 @@ const styles = (t: ReturnType<typeof useTheme>) =>
   StyleSheet.create({
     screen: { flex: 1, backgroundColor: t.abyss },
     header: { paddingHorizontal: 20, marginBottom: 16 },
-    eyebrow: { color: t.textMuted, letterSpacing: 3, fontWeight: '700', fontSize: 11 },
-    brandTitle: { color: t.text, fontSize: 34, fontWeight: '900', letterSpacing: -1, marginTop: 6 },
-    subtitle: { color: t.textMuted, fontSize: 14, fontWeight: '500', lineHeight: 20, marginTop: 8 },
+    eyebrow: { color: t.textMuted, letterSpacing: 3, fontWeight: '700', fontSize: 11, fontFamily: t.fontBodyBold },
+    brandTitle: { color: t.text, fontSize: 38, fontWeight: '300', fontFamily: t.fontHeading, letterSpacing: 0.5, marginTop: 6 },
+    subtitle: { color: t.textMuted, fontSize: 14, fontWeight: '500', lineHeight: 20, marginTop: 8, fontFamily: t.fontBody },
     searchWrap: {
       flexDirection: 'row', alignItems: 'center', gap: 10,
       marginHorizontal: 20, marginBottom: 14,
@@ -164,6 +202,24 @@ const styles = (t: ReturnType<typeof useTheme>) =>
     statusCount: { color: t.textTertiary, fontSize: 11, fontWeight: '600', letterSpacing: 0.5 },
     grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, gap: 12 },
     gridCell: { width: '47%', flexGrow: 1 },
+    studioCard: {
+      flexDirection: 'row', alignItems: 'center', gap: 12,
+      marginHorizontal: 20, marginBottom: 16,
+      backgroundColor: `${t.secondary}0D`, borderColor: `${t.secondary}40`, borderWidth: 1,
+      borderRadius: t.cardRadius, padding: 16,
+    },
+    studioIconWrap: {
+      width: 44, height: 44, borderRadius: 22,
+      backgroundColor: `${t.secondary}1A`, alignItems: 'center', justifyContent: 'center',
+    },
+    studioTitle: { color: t.text, fontSize: 16, fontWeight: '700', fontFamily: t.fontHeadingMedium },
+    studioSub: { color: t.textMuted, fontSize: 11.5, fontWeight: '500', lineHeight: 16, marginTop: 3, fontFamily: t.fontBody },
+    discoverGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 20, marginTop: 4 },
+    discoverCard: {
+      width: '30.5%', backgroundColor: t.surface, borderColor: t.border, borderWidth: 1,
+      borderRadius: t.cardRadius, paddingVertical: 14, alignItems: 'center', gap: 7,
+    },
+    discoverLabel: { color: t.text, fontSize: 11, fontWeight: '600', fontFamily: t.fontBodySemiBold },
     loadingWrap: { alignItems: 'center', justifyContent: 'center', paddingVertical: 60, gap: 12 },
     loadingText: { color: t.textMuted, fontSize: 13, fontWeight: '600' },
     emptyWrap: { alignItems: 'center', justifyContent: 'center', paddingVertical: 60, gap: 8 },
