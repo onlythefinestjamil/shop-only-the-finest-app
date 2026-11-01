@@ -191,7 +191,131 @@ function mapServerProduct(p: Record<string, unknown>): ShopifyProduct {
 /**
  * Fetch the product catalog from the Base44 server function getShopifyProducts.
  * Returns null on any failure so the caller falls back to the seed catalog.
+ *
+ * When the Base44 function is unavailable or returns an empty list, the live
+ * catalog is fetched from the OTF Shopify assistant proxy (Render), which
+ * holds the Shopify Admin token server-side and serves the full product
+ * catalog. This keeps the entire store catalog visible in the app at all
+ * times.
  */
+const CATALOG_PROXY = 'https://otf-shopify-assistant.onrender.com/products?limit=250';
+const CATALOG_CACHE_TTL_MS = 5 * 60 * 1000;
+
+let proxyCatalog: { at: number; products: ShopifyProduct[] } | null = null;
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&#39;|&rsquo;/g, "'")
+    .replace(/&quot;|&ldquo;|&rdquo;/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Map a raw Shopify Admin API product onto the app's ShopifyProduct shape. */
+function mapAdminProduct(p: Record<string, unknown>): ShopifyProduct {
+  const handle = typeof p.handle === 'string' ? p.handle : '';
+  const rawVariants = (Array.isArray(p.variants) ? p.variants : []) as Record<string, unknown>[];
+  const rawOptions = (Array.isArray(p.options) ? p.options : []) as Record<string, unknown>[];
+  const rawImages = (Array.isArray(p.images) ? p.images : []) as Record<string, unknown>[];
+
+  const optionNames = rawOptions.map((o) => String(o.name ?? ''));
+  const images: ShopifyImage[] = rawImages.map((i) => ({
+    url: String(i.src ?? ''),
+    altText: (i.alt as string | null) ?? null,
+    width: typeof i.width === 'number' ? i.width : undefined,
+    height: typeof i.height === 'number' ? i.height : undefined,
+  }));
+
+  const variants: ShopifyVariant[] = rawVariants.map((v) => {
+    const optionValues = [v.option1, v.option2, v.option3].map((o) => (o == null ? null : String(o)));
+    const selectedOptions = optionNames.map((name, idx) => ({ name, value: optionValues[idx] ?? '' })).filter((so) => so.value);
+    const compareAt = v.compare_at_price != null && v.compare_at_price !== '' ? parseFloat(String(v.compare_at_price)) : null;
+    const inventoryQty = typeof v.inventory_quantity === 'number' ? v.inventory_quantity : 0;
+    const sellAnyway = String(v.inventory_policy ?? '') === 'continue';
+    return {
+      id: String(v.id ?? ''),
+      title: String(v.title ?? ''),
+      available: sellAnyway || inventoryQty > 0,
+      price: parseFloat(String(v.price ?? '0')) || 0,
+      selectedOptions,
+      ...(compareAt != null ? {} : {}),
+    };
+  });
+
+  const rawTags = p.tags;
+  const tags = Array.isArray(rawTags) ? rawTags.map(String) : typeof rawTags === 'string' && rawTags ? rawTags.split(',').map((t) => t.trim()).filter(Boolean) : [];
+
+  const firstAvailable = variants.find((v) => v.available) ?? variants[0];
+  const bodyHtml = typeof p.body_html === 'string' ? p.body_html : '';
+  const productType = typeof p.product_type === 'string' ? p.product_type : '';
+
+  return {
+    id: String(p.id ?? ''),
+    handle,
+    title: String(p.title ?? ''),
+    description: bodyHtml ? stripHtml(bodyHtml) : '',
+    price: firstAvailable?.price ?? 0,
+    compareAtPrice: null,
+    image: images[0]?.url ?? null,
+    images,
+    variants,
+    options: optionNames.map((name, idx) => ({
+      name,
+      values: Array.isArray(rawOptions[idx]?.values) ? (rawOptions[idx]!.values as unknown[]).map(String) : [],
+    })),
+    productType,
+    tags,
+    vendor: typeof p.vendor === 'string' && p.vendor ? p.vendor : BRAND,
+    available: variants.some((v) => v.available),
+    url: handle ? `${SHOP_DOMAIN}/products/${handle}` : SHOP_DOMAIN,
+    collection: productType,
+  };
+}
+
+/** Fetch the full catalog from the OTF Shopify assistant proxy (Render). */
+async function fetchProxyCatalog(): Promise<ShopifyProduct[] | null> {
+  if (proxyCatalog && Date.now() - proxyCatalog.at < CATALOG_CACHE_TTL_MS) {
+    return proxyCatalog.products;
+  }
+  try {
+    const response = await fetch(CATALOG_PROXY, { headers: { Accept: 'application/json' } });
+    if (!response.ok) return null;
+    const data = (await response.json()) as { products?: Record<string, unknown>[] };
+    const list = Array.isArray(data?.products) ? data!.products! : [];
+    // Only published products make it to the storefront.
+    const published = list.filter((p) => p.published_at != null && p.status !== 'draft');
+    if (published.length === 0) return null;
+    const mapped = published.map(mapAdminProduct);
+    proxyCatalog = { at: Date.now(), products: mapped };
+    return mapped;
+  } catch {
+    return null;
+  }
+}
+
+function filterCatalog(catalog: ShopifyProduct[], query?: string, collection?: string): ShopifyProduct[] {
+  let list = catalog;
+  const q = (query ?? '').trim().toLowerCase();
+  if (q) {
+    list = list.filter((p) =>
+      p.title.toLowerCase().includes(q) ||
+      p.productType.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q) ||
+      p.tags.some((t) => t.toLowerCase().includes(q))
+    );
+  }
+  const c = (collection ?? '').trim().toLowerCase();
+  if (c) {
+    list = list.filter(
+      (p) => (p.collection ?? '').toLowerCase() === c || p.productType.toLowerCase().includes(c) || p.tags.some((t) => t.toLowerCase() === c)
+    );
+  }
+  return list;
+}
+
 export async function fetchProducts(query?: string, collection?: string): Promise<ShopifyProduct[] | null> {
   const client = getBase44Client();
   try {
@@ -200,11 +324,16 @@ export async function fetchProducts(query?: string, collection?: string): Promis
       collection: collection ?? '',
     });
     const list = (result as Record<string, unknown>)?.products;
-    if (!Array.isArray(list) || list.length === 0) return null;
-    return (list as Record<string, unknown>[]).map(mapServerProduct);
+    if (Array.isArray(list) && list.length > 0) {
+      return (list as Record<string, unknown>[]).map(mapServerProduct);
+    }
   } catch {
-    return null;
+    // fall through to the live proxy catalog
   }
+  // Base44 unavailable or empty — serve the full live catalog from the proxy.
+  const catalog = await fetchProxyCatalog();
+  if (!catalog) return null;
+  return filterCatalog(catalog, query, collection);
 }
 
 /** Fetch Shopify collections. Returns null on failure. */
@@ -213,19 +342,44 @@ export async function fetchCollections(): Promise<ShopifyCollection[] | null> {
   try {
     const result = await client.functions.invoke('getShopifyCollections', {});
     const list = (result as Record<string, unknown>)?.collections;
-    if (!Array.isArray(list)) return null;
-    return (list as Record<string, unknown>[]).map((c) => ({
-      id: String(c.id ?? ''),
-      handle: String(c.handle ?? ''),
-      title: String(c.title ?? ''),
-      description: String(c.description ?? ''),
-      image: typeof c.image === 'string' ? c.image : null,
-      productCount: typeof c.productCount === 'number' ? c.productCount : 0,
-      url: c.handle ? `${SHOP_DOMAIN}/collections/${c.handle}` : SHOP_DOMAIN,
-    }));
+    if (Array.isArray(list) && list.length > 0) {
+      return (list as Record<string, unknown>[]).map((c) => ({
+        id: String(c.id ?? ''),
+        handle: String(c.handle ?? ''),
+        title: String(c.title ?? ''),
+        description: String(c.description ?? ''),
+        image: typeof c.image === 'string' ? c.image : null,
+        productCount: typeof c.productCount === 'number' ? c.productCount : 0,
+        url: c.handle ? `${SHOP_DOMAIN}/collections/${c.handle}` : SHOP_DOMAIN,
+      }));
+    }
   } catch {
-    return null;
+    // fall through to derived collections
   }
+  // Base44 unavailable or empty — derive collections from the live catalog's
+  // product types (each type becomes a collection with its product count).
+  const catalog = await fetchProxyCatalog();
+  if (!catalog) return null;
+  const byType = new Map<string, number>();
+  for (const p of catalog) {
+    const key = p.productType || 'Other';
+    byType.set(key, (byType.get(key) ?? 0) + 1);
+  }
+  if (byType.size === 0) return null;
+  return Array.from(byType.entries())
+    .map(([title, productCount]) => {
+      const handle = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return {
+        id: `type-${handle}`,
+        handle,
+        title,
+        description: `${title} from Only The Finest.`,
+        image: catalog.find((p) => (p.productType || 'Other') === title)?.image ?? null,
+        productCount,
+        url: `${SHOP_DOMAIN}/collections/${handle}`,
+      };
+    })
+    .sort((a, b) => b.productCount - a.productCount);
 }
 
 /**
