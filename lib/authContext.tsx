@@ -8,6 +8,7 @@ import type { User } from '@base44/sdk';
 import {
   authErrorMessage,
   clearSession,
+  socialLogin,
   login as loginBase44,
   register as registerBase44,
   resendOtp as resendOtpBase44,
@@ -23,6 +24,7 @@ interface AuthContextValue extends AuthSessionState {
   verifyOtp: (email: string, otp: string, password: string) => Promise<void>;
   resendOtp: (email: string) => Promise<void>;
   requestPasswordReset: (email: string) => Promise<void>;
+  loginSocial: (provider: 'google' | 'apple' | 'facebook') => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -69,6 +71,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       verifyOtp: async (email, otp, password) => {
         try {
           const user = await verifyOtpBase44(email, otp, password);
+          setState({ status: 'signed_in', user, error: null });
+        } catch (error) {
+          setState((current) => ({ ...current, error: authErrorMessage(error) }));
+          throw error;
+        }
+      },
+      loginSocial: async (provider: 'google' | 'apple' | 'facebook') => {
+        try {
+          const user = await socialLogin(provider);
           setState({ status: 'signed_in', user, error: null });
         } catch (error) {
           setState((current) => ({ ...current, error: authErrorMessage(error) }));

@@ -8,6 +8,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { User } from '@base44/sdk';
 import { getBase44Client, resetBase44Client } from './base44';
+import { config } from './config';
+import * as WebBrowser from 'expo-web-browser';
 
 export const SESSION_KEY = '@otf/base44-access-token';
 
@@ -76,4 +78,22 @@ export function isUnauthorizedError(error: unknown): boolean {
 
 export function authErrorMessage(error: unknown): string {
   return errorMessage(error, 'Authentication failed. Check your details and try again.');
+}
+
+export type SocialProvider = 'google' | 'apple' | 'facebook';
+
+/** Social sign-in via the OTF Base44 backend — in-app auth session, token captured from redirect. */
+export async function socialLogin(provider: SocialProvider): Promise<User> {
+  const client = getBase44Client();
+  WebBrowser.maybeCompleteAuthSession();
+  const redirect = 'onlythefinest://auth';
+  const path = provider === 'google' ? '' : `/${provider}`;
+  const loginUrl = `${config.appBaseUrl}/api/apps/auth${path}/login?app_id=${config.appId}&from_url=${encodeURIComponent(redirect)}`;
+  const result = await WebBrowser.openAuthSessionAsync(loginUrl, redirect);
+  if (result.type !== 'success' || !result.url) throw new Error('Sign-in was cancelled.');
+  const token = new URL(result.url).searchParams.get('access_token');
+  if (!token) throw new Error('Sign-in did not return a token.');
+  await AsyncStorage.setItem(SESSION_KEY, token);
+  client.auth.setToken(token, false);
+  return client.auth.me();
 }

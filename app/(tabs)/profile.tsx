@@ -86,6 +86,18 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleSocial = async (provider: 'google' | 'apple' | 'facebook') => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await auth.loginSocial(provider);
+    } catch {
+      /* error surfaced via auth.error */
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const handleReset = async () => {
     if (!email) return;
     setBusy(true);
@@ -272,6 +284,19 @@ export default function ProfileScreen() {
             </View>
           ) : null}
 
+          {(mode === 'login' || mode === 'register') && (
+            <View style={s.socialRow}>
+              <Pressable style={s.socialBtn} onPress={() => handleSocial('google')} disabled={busy}>
+                <Ionicons name="logo-google" size={19} color={theme.text} />
+              </Pressable>
+              <Pressable style={s.socialBtn} onPress={() => handleSocial('google')} disabled={busy}>
+                <Ionicons name="logo-apple" size={20} color={theme.text} />
+              </Pressable>
+              <Pressable style={s.socialBtn} onPress={() => handleSocial('google')} disabled={busy}>
+                <Ionicons name="logo-facebook" size={19} color={theme.text} />
+              </Pressable>
+            </View>
+          )}
           {mode === 'login' && (
             <>
               <Button label="Sign In" icon="enter" onPress={handleLogin} loading={busy} style={{ marginTop: 16 }} />
@@ -373,7 +398,9 @@ const styles = (t: ReturnType<typeof useTheme>) =>
     input: { backgroundColor: t.surfaceMuted, borderColor: t.border, borderWidth: 1, borderRadius: t.buttonRadius, paddingHorizontal: 14, paddingVertical: 13, color: t.text, fontSize: 15, fontWeight: '600' },
     errorBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: `${t.error}18`, borderColor: `${t.error}44`, borderWidth: 1, borderRadius: t.buttonRadius, paddingHorizontal: 12, paddingVertical: 10, marginTop: 14 },
     errorText: { color: t.error, fontSize: 12, fontWeight: '600', flex: 1 },
-    authSwitchRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14, paddingHorizontal: 4 },
+    socialRow: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginTop: 14 },
+  socialBtn: { width: 46, height: 46, borderRadius: 23, backgroundColor: t.surface, borderWidth: 1, borderColor: t.border, alignItems: 'center', justifyContent: 'center' },
+  authSwitchRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14, paddingHorizontal: 4 },
     authSwitchText: { color: t.secondary, fontSize: 13, fontWeight: '600' },
     authFooter: { color: t.textTertiary, fontSize: 11, textAlign: 'center', marginTop: 20, lineHeight: 16, paddingHorizontal: 20 },
   });
