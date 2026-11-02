@@ -17,7 +17,7 @@ export const config = {
   appId: APP_ID,
   appBaseUrl: APP_BASE_URL,
   // The SDK defaults serverUrl to https://base44.app — no need to override.
-  serverUrl: '',
+  serverUrl: 'https://base44.app',
   configured: Boolean(APP_ID),
 };
 
