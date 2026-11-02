@@ -6,7 +6,9 @@
  * Selecting a tier opens the live membership page to complete signup.
  */
 
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import InAppCheckout from '../components/InAppCheckout';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -97,12 +99,16 @@ const TIERS: Tier[] = [
 
 const MEMBERSHIP_URL = 'https://www.shoponlythefinest.com/membership';
 
+// In-app: open the membership page inside the app (no Safari).
+
 export default function MembershipScreen() {
+  const [joinOpen, setJoinOpen] = useState(false);
   const theme = useTheme();
   const router = useRouter();
   const s = styles(theme);
 
   return (
+    <>
     <SafeAreaView style={s.safe} edges={['top']}>
       <View style={s.headerRow}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
@@ -149,7 +155,7 @@ export default function MembershipScreen() {
 
             <Pressable
               style={[s.selectBtn, tier.recommended && s.selectBtnGold]}
-              onPress={() => Linking.openURL(MEMBERSHIP_URL)}
+              onPress={() => setJoinOpen(true)}
             >
               <Text style={[s.selectText, tier.recommended && s.selectTextGold]}>Select {tier.name}</Text>
             </Pressable>
@@ -161,6 +167,8 @@ export default function MembershipScreen() {
         </Text>
       </ScrollView>
     </SafeAreaView>
+    <InAppCheckout url={joinOpen ? MEMBERSHIP_URL : null} onClose={() => setJoinOpen(false)} onComplete={() => {}} />
+    </>
   );
 }
 

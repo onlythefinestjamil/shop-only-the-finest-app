@@ -5,13 +5,14 @@
  */
 
 import React, { useState } from 'react';
-import { Alert, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../lib/theme';
 import { useCart } from '../../lib/cartContext';
 import { createCheckoutUrl, formatPrice } from '../../lib/shopify';
 import { Button } from '../../components/Button';
+import InAppCheckout from '../../components/InAppCheckout';
 
 export default function CartScreen() {
   const theme = useTheme();
@@ -19,6 +20,7 @@ export default function CartScreen() {
   const { lines, subtotal, count, updateQuantity, removeItem, clear } = useCart();
   const s = styles(theme);
   const [checkingOut, setCheckingOut] = useState(false);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
 
   const handleCheckout = async () => {
     if (lines.length === 0) return;
@@ -28,11 +30,10 @@ export default function CartScreen() {
       .map((l) => ({ variantId: l.variantId, quantity: l.quantity }));
     const url = await createCheckoutUrl(lineItems);
     setCheckingOut(false);
-    const opened = await Linking.canOpenURL(url);
-    if (opened) {
-      Linking.openURL(url).catch(() => Alert.alert('Unable to open checkout', `Could not open ${url}.`));
+    if (url) {
+      setCheckoutUrl(url);
     } else {
-      Alert.alert('Checkout', `Complete your purchase at:\n${url}`, [{ text: 'Open Site', onPress: () => Linking.openURL('https://www.shoponlythefinest.com').catch(() => {}) }]);
+      Alert.alert('Checkout', 'Could not start checkout. Try again in a moment.');
     }
   };
 
@@ -105,6 +106,7 @@ export default function CartScreen() {
           </View>
         )}
       </ScrollView>
+    <InAppCheckout url={checkoutUrl} onClose={() => setCheckoutUrl(null)} onComplete={clear} />
     </View>
   );
 }
