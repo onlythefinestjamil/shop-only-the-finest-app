@@ -86,7 +86,7 @@ export type SocialProvider = 'google' | 'apple' | 'facebook';
 export async function socialLogin(provider: SocialProvider): Promise<User> {
   const client = getBase44Client();
   WebBrowser.maybeCompleteAuthSession();
-  const redirect = 'onlythefinest://auth';
+  const redirect = `${config.appBaseUrl}/auth`;
   const path = provider === 'google' ? '' : `/${provider}`;
   const loginUrl = `${config.appBaseUrl}/api/apps/auth${path}/login?app_id=${config.appId}&from_url=${encodeURIComponent(redirect)}`;
   const result = await WebBrowser.openAuthSessionAsync(loginUrl, redirect);
